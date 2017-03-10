@@ -1,0 +1,21 @@
+1. To run the program, type the following command in R
+
+	>source("script.R")
+
+2. Note:
+o File "loader.R" contains R code to load the data. Proper modifications are
+  required to pick up the right dataset. To add a new dataset, simply
+  follow examples provided in the file.
+o "kasp.R" contains the code for KASP (fast approximate spectral clustering
+  implemented with K-means).
+o All parameters are to be modified within file kasp.R. This includes the
+  data reduction ratio "alpha", bandwidth for the Gaussian kernel "sigma".
+  Additionally, one can also set the following parameters based on needs:
+
+  	> maximum number of iterations "iter.max" in K-means
+	> number of restarts "nstart" in K-means
+	> sampling ratio (currently 0.1 is used for dataset smaller than 300000
+	  and 0.05 otherwise) 
+	> number of permutations to sample when computing clustering rate
+	  (currently 10000 is used if the number of final clusters is larger
+	  than 7)
