@@ -1,7 +1,8 @@
 library(kernlab);
 library(MASS);
 library(gregmisc);
-
+library(cluster)
+library(wskm)
 # check the result
 cRate=function(sp0, sp1, nc, N)
 {
@@ -33,6 +34,8 @@ cRate=function(sp0, sp1, nc, N)
 
 espectral=function(x,sp,ncluster,dim)
 {
+
+
 	N=nrow(x);	#The # of observations
 	m=dim;		#The # of features
 	sp0=sp;
@@ -44,28 +47,75 @@ espectral=function(x,sp,ncluster,dim)
 	n1=N*0.05;
 	idx= sample((1:N),n1,replace = FALSE);
 	xx=y[idx,];
-	cat("begin coarse K-means\n");
-	xxkms=kmeans(xx[,1:m],centers = n, iter.max = 200, nstart = 20,algorithm = c("Hartigan-Wong")); 
-	cat("begin K-means\n")
-	xkms= kmeans(y[,1:m],centers = xxkms$centers, iter.max = 200, nstart = 1, algorithm = c("Hartigan-Wong"));
 
-	tmp = xkms$cluster;
-	x = xkms$centers;
+	ptm = proc.time()
+	
+	# # use coarse k-means
+	# cat("begin coarse K-means\n");
+	# xxkms=kmeans(xx[,1:m],centers = n, iter.max = 200, nstart = 20,algorithm = c("Hartigan-Wong")); 
+	# cat("begin K-means\n")
+	# xkms= kmeans(y[,1:m],centers = xxkms$centers, iter.max = 200, nstart = 1, algorithm = c("Hartigan-Wong"));
+	# tmp = xkms$cluster;
+	# x = xkms$centers;
+	# sp = specc(x, centers=3);
+	# sp = sp@.Data;
+	# spp=xkms$cluster;
+	# for(i in 1:n)
+	# {
+	# 	spp[spp==i]=sp[i];
+	# }
 
+	# # use ewkm only
+	# cat("begin ewkm \n");
+	# xkms = ewkm(y[,1:m],3, lambda = 0.55, maxiter = 100);
+	# spp = xkms$cluster;
+
+	# # ewkm + spec
+	# xkms = ewkm(y[,1:m],n, lambda = 0.55, maxiter = 200);
+	# tmp = xkms$cluster;
+	# x = xkms$centers;
+
+	# sp = specc(x, centers=3);
+	# sp = sp@.Data;
+
+	# spp=xkms$cluster;
+	# for(i in 1:n)
+	# {
+	# 	spp[spp==i]=sp[i];
+	# }
+
+
+	# # use Clustering Large Applications
+	# cat("begin clara \n");
+	# xkms = clara(y[,1:m],3, sample = 200);
+	# spp = xkms$cluster;
+
+
+	# # Clustering Large Applications + spec
+	cat("begin clara\n");
+	xkms = clara(y[,1:m],n,pamLike = TRUE);
+	tmp = xkms$clustering;
+	x = xkms$medoids;
 	sp = specc(x, centers=3);
 	sp = sp@.Data;
-
 	spp=xkms$cluster;
 	for(i in 1:n)
 	{
 		spp[spp==i]=sp[i];
 	}
 
-	cat("End of KASP @ ",date(),"\n");
+	# tmp = clara(y[,1:m],3);
+	# spp = tmp$clustering;
 
 	cRate(sp0,spp,ncluster,N);
+	
+
+	cat("run time:", proc.time() - ptm,"\n")
 }
 
+
+
+# loader
 main=function(){
 	x=read.table(file="connect4.Rdata",header=FALSE,sep=",",strip.white=FALSE);
 	x$label=x$V43;
@@ -86,7 +136,7 @@ main=function(){
 		if(sd(x[,i])==0) {x[,i]=0;}
 		else {x[,i]=(x[,i]-mean(x[,i]))/sd(x[,i]); }
 	}
-	# x: data+ label, sp: repsult, ncluster: 3, 42 feature
+	# x: data+ label, sp: result, ncluster: 3, 42 feature
 	z=espectral(x,sp,ncluster=nc,42);
 }
 

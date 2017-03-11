@@ -1,6 +1,7 @@
 library(kernlab);
 library(MASS);
 library(gregmisc);
+library(cluster)
 library(wskm)
 # check the result
 cRate=function(sp0, sp1, nc, N)
@@ -49,20 +50,20 @@ espectral=function(x,sp,ncluster,dim)
 
 	ptm = proc.time()
 	
-	# use coarse k-means
-	cat("begin coarse K-means\n");
-	xxkms=kmeans(xx[,1:m],centers = n, iter.max = 200, nstart = 20,algorithm = c("Hartigan-Wong")); 
-	cat("begin K-means\n")
-	xkms= kmeans(y[,1:m],centers = xxkms$centers, iter.max = 200, nstart = 1, algorithm = c("Hartigan-Wong"));
-	tmp = xkms$cluster;
-	x = xkms$centers;
-	sp = specc(x, centers=3);
-	sp = sp@.Data;
-	spp=xkms$cluster;
-	for(i in 1:n)
-	{
-		spp[spp==i]=sp[i];
-	}
+	# # use coarse k-means
+	# cat("begin coarse K-means\n");
+	# xxkms=kmeans(xx[,1:m],centers = n, iter.max = 200, nstart = 20,algorithm = c("Hartigan-Wong")); 
+	# cat("begin K-means\n")
+	# xkms= kmeans(y[,1:m],centers = xxkms$centers, iter.max = 200, nstart = 1, algorithm = c("Hartigan-Wong"));
+	# tmp = xkms$cluster;
+	# x = xkms$centers;
+	# sp = specc(x, centers=3);
+	# sp = sp@.Data;
+	# spp=xkms$cluster;
+	# for(i in 1:n)
+	# {
+	# 	spp[spp==i]=sp[i];
+	# }
 
 	# # use ewkm only
 	# cat("begin ewkm \n");
@@ -70,7 +71,7 @@ espectral=function(x,sp,ncluster,dim)
 	# spp = xkms$cluster;
 
 	# # ewkm + spec
-	# xkms = ewkm(y[,1:m],n, lambda = 0.55, maxiter = 100);
+	# xkms = ewkm(y[,1:m],n, lambda = 0.55, maxiter = 200);
 	# tmp = xkms$cluster;
 	# x = xkms$centers;
 
@@ -84,10 +85,30 @@ espectral=function(x,sp,ncluster,dim)
 	# }
 
 
+	# # use Clustering Large Applications
+	# cat("begin clara \n");
+	# xkms = clara(y[,1:m],3, sample = 200);
+	# spp = xkms$cluster;
 
-	# cat("End of KASP @ ",date(),"\n");
+
+	# # Clustering Large Applications + spec
+	cat("begin clara\n");
+	xkms = clara(y[,1:m],n,pamLike = TRUE);
+	tmp = xkms$clustering;
+	x = xkms$medoids;
+	sp = specc(x, centers=3);
+	sp = sp@.Data;
+	spp=xkms$cluster;
+	for(i in 1:n)
+	{
+		spp[spp==i]=sp[i];
+	}
+
+	# tmp = clara(y[,1:m],3);
+	# spp = tmp$clustering;
 
 	cRate(sp0,spp,ncluster,N);
+	
 
 	cat("run time:", proc.time() - ptm,"\n")
 }
