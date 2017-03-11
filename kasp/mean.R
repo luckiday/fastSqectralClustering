@@ -1,8 +1,8 @@
 library(kernlab);
 library(MASS);
-library(gregmisc);
-library(cluster)
-library(wskm)
+library(gtools);
+library(cluster);
+library(wskm);
 # check the result
 cRate=function(sp0, sp1, nc, N)
 {
