@@ -22,7 +22,8 @@ cRate=function(sp0, sp1, nc, N)
 		}
 	} else {
 			for(i in 1:10000)
-			{ permx=sample(seqs,nc, replace=FALSE);
+			{ 
+				permx=sample(seqs,nc, replace=FALSE);
 				for(j in 1:nc) { spx[sp1==j]=permx[j]; }
 				tmp=sum(as.integer(sp0)==spx)/N; if(tr<tmp) {tr=tmp;spy=spx;}
 			}
